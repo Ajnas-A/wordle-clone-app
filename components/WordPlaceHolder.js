@@ -1,18 +1,19 @@
 import React, { useEffect, useState } from "react";
 import setDelay from "./../utils/getDelay";
 
-function WordPlaceHolder({ array, totalState }) {
+function WordPlaceHolder({ array, totalState, value }) {
   const [greenSpots, setGreenSpots] = useState([]);
   const [yellowArray, setYellowArray] = useState([]);
+  let tempGreenSpots =
+    totalState?.correctPlaced.map((e) => (e === true ? true : false)) || [];
 
   useEffect(() => {
-    setGreenSpots(
-      totalState?.correctPlaced.map((e) => (e === true ? true : false)) || []
-    );
+    setGreenSpots(tempGreenSpots);
   }, [totalState]);
 
   useEffect(() => {
     let yellowTempArray = [];
+
     greenSpots?.map((e, i) => {
       if (e === false) {
         if (totalState?.initialCheck[i]) {
@@ -22,18 +23,24 @@ function WordPlaceHolder({ array, totalState }) {
     });
     setYellowArray(yellowTempArray);
   }, [greenSpots]);
+
+  // const data = `${
+  //   greenSpots[i] ? "bg-green-400" : yellowArray[i] ? "bg-yellow-400" : ""
+  // }`;
+
   return (
     <div className="grid grid-cols-5 gap-2">
       {array.map((e, i) => {
         return (
           <div
+            key={i}
             className={`${
               greenSpots[i]
-                ? "bg-green-400 rotate-0"
+                ? "bg-green-700"
                 : yellowArray[i]
-                ? "bg-yellow-400 rotate-0"
-                : ""
-            } bg-blue-300 rotate-360 h-12 w-12 border flex items-center justify-center transition duration-500 ${setDelay(
+                ? "bg-yellow-600"
+                : "bg-gray-600"
+            }  h-12 w-12 border flex items-center justify-center transition text-white capitalize font-semibold duration-500 ${setDelay(
               i
             )}`}
           >
@@ -45,4 +52,4 @@ function WordPlaceHolder({ array, totalState }) {
   );
 }
 
-export default WordPlaceHolder;
+export default React.memo(WordPlaceHolder);

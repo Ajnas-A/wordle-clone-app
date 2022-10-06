@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
 import WordPlaceHolder from "./WordPlaceHolder";
 import _ from "lodash";
+import getData from "../utils/getData";
+import Input from "./Input";
 
-function HomeComponent() {
+function HomeComponent({ data }) {
   const [answerWord, setAnswerWord] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const [word, setWord] = useState([]);
+  const [word, setWord] = useState(data);
   const [status, setStatus] = useState(false);
   const [initialCheck, setInitialCheck] = useState([]);
   const [correctPlaced, setCorrectPlaced] = useState([]);
@@ -19,13 +20,12 @@ function HomeComponent() {
     },
   ]);
 
-  const handleOnChange = (e) => {
-    setInputValue(e.target.value);
-  };
-  const onKeyDownHandler = (e) => {
+  const onKeyDownHandler = (e, ref) => {
+    if (status === "failed") return;
+    if (status === true) return;
     if (e.keyCode === 13) {
-      setAnswerWord(e.target.value.split(""));
-      setInputValue("");
+      setAnswerWord(e.target.value.toLowerCase().split(""));
+      ref.current.blur();
     }
   };
 
@@ -36,7 +36,6 @@ function HomeComponent() {
     setStatus(false);
     setInitialCheck([]);
     setCorrectPlaced([]);
-    setInputValue("");
     setTotalState([
       {
         correctPlaced: [],
@@ -47,32 +46,29 @@ function HomeComponent() {
   };
 
   const getNewWord = async () => {
-    const response = await fetch(
-      "http://thatwordleapi.azurewebsites.net/get/"
-    ).then((res) => res.json());
-    console.log(response.Response);
-    setWord(response.Response.split(""));
-
-    setWord(response.Response.split(""));
-    console.log(response.Response);
+    const response = await getData();
+    setWord(response);
   };
 
   const handleShowWord = () => {
     setShowWord(true);
   };
 
-  useEffect(() => {
-    getNewWord();
-  }, []);
+  const checkResult = () => {
+    if (_.isEqual(answerWord, word)) return setStatus(true);
+    return setStatus("failed");
+  };
 
   useEffect(() => {
-    if (totalState.length - 1 === 5) return setStatus("failed");
+    if (totalState.length - 1 === 5) checkResult();
   }, [totalState]);
 
   useEffect(() => {
     if (answerWord.length === 0) return;
 
     if (status === true) return;
+
+    if (status === "failed") return;
 
     const wordsPresent = word.map((e) => {
       return answerWord.includes(e);
@@ -95,15 +91,15 @@ function HomeComponent() {
   }, [correctPlaced]);
 
   return (
-    <div className="h-screen bg-gray-400 flex items-center justify-center">
+    <div className="h-screen bg-gray-900 flex items-center justify-center text-gray-200">
       <div className="space-y-5 flex flex-col items-center">
         <h1 className="text-center ">WORDLE</h1>
         <div className="flex flex-col space-y-3">
-          <WordPlaceHolder array={word} totalState={totalState[1]} />
-          <WordPlaceHolder array={word} totalState={totalState[2]} />
-          <WordPlaceHolder array={word} totalState={totalState[3]} />
-          <WordPlaceHolder array={word} totalState={totalState[4]} />
-          <WordPlaceHolder array={word} totalState={totalState[5]} />
+          <WordPlaceHolder value={0} array={word} totalState={totalState[1]} />
+          <WordPlaceHolder value={1} array={word} totalState={totalState[2]} />
+          <WordPlaceHolder value={2} array={word} totalState={totalState[3]} />
+          <WordPlaceHolder value={3} array={word} totalState={totalState[4]} />
+          <WordPlaceHolder value={4} array={word} totalState={totalState[5]} />
         </div>
         <div>
           {status === true ? (
@@ -115,18 +111,10 @@ function HomeComponent() {
         </div>
 
         <p>Attempt : {totalState.length - 1} / 5</p>
-        <input
-          className="p-4
-         bg-gray-600 focus:outline-none text-white"
-          onKeyDown={onKeyDownHandler}
-          onChange={handleOnChange}
-          type="text"
-          name=""
-          id=""
-          value={inputValue}
-        />
 
-        <button onClick={handleShowWord}>Get Word</button>
+        <Input onKeyDownHandler={onKeyDownHandler} status={status} />
+
+        <button onClick={handleShowWord}>Show Word</button>
         {showWord && <p>{word}</p>}
       </div>
     </div>
