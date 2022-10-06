@@ -1,26 +1,29 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import WordPlaceHolder from "./WordPlaceHolder";
 import _ from "lodash";
-import getData from "../utils/getData";
 import Input from "./Input";
+import getWordDetails from "../utils/getWordDetails";
+import HintModal from "./HintModal";
+import reducerHint from "../utils/reducerHint";
 
-function HomeComponent({ data }) {
+function HomeComponent({ data, wordHint }) {
   const [answerWord, setAnswerWord] = useState([]);
   const [word, setWord] = useState(data);
+  const [hint, dispatchHint] = useReducer(reducerHint, {
+    showHint: false,
+    word: wordHint,
+  });
   const [status, setStatus] = useState(false);
   const [total, setTotal] = useState([]);
   const [showWord, setShowWord] = useState(false);
 
-  let totalState = {};
-
   useEffect(() => {
+    let totalState = {};
     if (answerWord.length === 0) return;
     const initialCheck = word.map((e) => answerWord.includes(e));
     const correctPlaced = word.map((e, i) => e === answerWord[i]);
     totalState = { initialCheck, answerWord, correctPlaced };
     setTotal([...total, totalState]);
-    // if (total?.length === 4) checkResult();
-    // if (_.isEqual(answerWord, word)) return setStatus(true);
     checkResult();
   }, [answerWord]);
 
@@ -41,12 +44,23 @@ function HomeComponent({ data }) {
   };
 
   const getNewWord = async () => {
-    const response = await getData();
-    setWord(response);
+    const { data, wordHint } = await getWordDetails();
+    dispatchHint({
+      type: "CHANGE_HINT",
+      payload: wordHint,
+    });
+    setWord(data);
   };
 
   const handleShowWord = () => {
     setShowWord(true);
+  };
+
+  const handleHintWord = () => {
+    console.log(hint);
+    setHint((prevState) => {
+      return { ...prevState, showHint: !prevState.showHint };
+    });
   };
 
   const checkResult = () => {
@@ -59,7 +73,7 @@ function HomeComponent({ data }) {
   };
 
   return (
-    <div className="h-screen bg-gray-900 flex items-center justify-center text-gray-200">
+    <div className="h-screen bg-gray-900 flex items-center justify-center text-gray-200 relative">
       <div className="space-y-5 flex flex-col items-center">
         <h1 className="text-center ">WORDLE</h1>
         <div className="flex flex-col space-y-3">
@@ -69,20 +83,40 @@ function HomeComponent({ data }) {
           <WordPlaceHolder value={3} array={word} totalState={total[3]} />
           <WordPlaceHolder value={4} array={word} totalState={total[4]} />
         </div>
-        <div>
+        <div className="flex flex-col space-y-2">
           {status === true ? (
             <p>Congrats you win</p>
           ) : (
             status === "failed" && <p>Sorry failed</p>
           )}
-          <button onClick={resetGame}>Get another word</button>
+          <button
+            className="bg-gray-600 rounded p-2 hover:bg-gray-400"
+            onClick={resetGame}
+          >
+            Get another word
+          </button>
         </div>
 
         <p>Attempt : {total.length} / 5</p>
 
         <Input onKeyDownHandler={onKeyDownHandler} status={status} />
 
-        <button onClick={handleShowWord}>Show Word</button>
+        <button
+          className="bg-gray-600 rounded p-2 hover:bg-gray-400"
+          onClick={() => dispatchHint({ type: "SHOW" })}
+        >
+          Show Hint
+        </button>
+        {hint.showHint && (
+          <HintModal hint={hint.word} onClickHandler={dispatchHint} />
+        )}
+
+        <button
+          className="bg-gray-600 rounded p-2 hover:bg-gray-400"
+          onClick={handleShowWord}
+        >
+          Show Word
+        </button>
         {showWord && <p>{word}</p>}
       </div>
     </div>
