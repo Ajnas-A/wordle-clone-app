@@ -8,24 +8,27 @@ function HomeComponent({ data }) {
   const [answerWord, setAnswerWord] = useState([]);
   const [word, setWord] = useState(data);
   const [status, setStatus] = useState(false);
-  const [initialCheck, setInitialCheck] = useState([]);
-  const [correctPlaced, setCorrectPlaced] = useState([]);
-
+  const [total, setTotal] = useState([]);
   const [showWord, setShowWord] = useState(false);
-  const [totalState, setTotalState] = useState([
-    {
-      correctPlaced: [],
-      initialCheck: [],
-      answerWord: [],
-    },
-  ]);
+
+  let totalState = {};
+
+  useEffect(() => {
+    if (answerWord.length === 0) return;
+    const initialCheck = word.map((e) => answerWord.includes(e));
+    const correctPlaced = word.map((e, i) => e === answerWord[i]);
+    totalState = { initialCheck, answerWord, correctPlaced };
+    setTotal([...total, totalState]);
+    // if (total?.length === 4) checkResult();
+    // if (_.isEqual(answerWord, word)) return setStatus(true);
+    checkResult();
+  }, [answerWord]);
 
   const onKeyDownHandler = (e, ref) => {
     if (status === "failed") return;
     if (status === true) return;
     if (e.keyCode === 13) {
       setAnswerWord(e.target.value.toLowerCase().split(""));
-      ref.current.blur();
     }
   };
 
@@ -34,15 +37,7 @@ function HomeComponent({ data }) {
     getNewWord();
     setAnswerWord([]);
     setStatus(false);
-    setInitialCheck([]);
-    setCorrectPlaced([]);
-    setTotalState([
-      {
-        correctPlaced: [],
-        initialCheck: [],
-        answerWord: [],
-      },
-    ]);
+    setTotal([]);
   };
 
   const getNewWord = async () => {
@@ -56,50 +51,23 @@ function HomeComponent({ data }) {
 
   const checkResult = () => {
     if (_.isEqual(answerWord, word)) return setStatus(true);
-    return setStatus("failed");
+    if (total?.length === 4) {
+      if (_.isEqual(answerWord, word)) return setStatus(true);
+      return setStatus("failed");
+    }
+    return setStatus(null);
   };
-
-  useEffect(() => {
-    if (totalState.length - 1 === 5) checkResult();
-  }, [totalState]);
-
-  useEffect(() => {
-    if (answerWord.length === 0) return;
-
-    if (status === true) return;
-
-    if (status === "failed") return;
-
-    const wordsPresent = word.map((e) => {
-      return answerWord.includes(e);
-    });
-    setInitialCheck(wordsPresent);
-    if (_.isEqual(answerWord, word)) return setStatus(true);
-  }, [answerWord]);
-
-  useEffect(() => {
-    if (initialCheck.length === 0) return;
-    const totalCorrect = word.map((e, i) => {
-      if (e === answerWord[i]) return true;
-    });
-    setCorrectPlaced(totalCorrect);
-  }, [initialCheck]);
-
-  useEffect(() => {
-    if (correctPlaced.length === 0) return;
-    setTotalState([...totalState, { initialCheck, answerWord, correctPlaced }]);
-  }, [correctPlaced]);
 
   return (
     <div className="h-screen bg-gray-900 flex items-center justify-center text-gray-200">
       <div className="space-y-5 flex flex-col items-center">
         <h1 className="text-center ">WORDLE</h1>
         <div className="flex flex-col space-y-3">
-          <WordPlaceHolder value={0} array={word} totalState={totalState[1]} />
-          <WordPlaceHolder value={1} array={word} totalState={totalState[2]} />
-          <WordPlaceHolder value={2} array={word} totalState={totalState[3]} />
-          <WordPlaceHolder value={3} array={word} totalState={totalState[4]} />
-          <WordPlaceHolder value={4} array={word} totalState={totalState[5]} />
+          <WordPlaceHolder value={0} array={word} totalState={total[0]} />
+          <WordPlaceHolder value={1} array={word} totalState={total[1]} />
+          <WordPlaceHolder value={2} array={word} totalState={total[2]} />
+          <WordPlaceHolder value={3} array={word} totalState={total[3]} />
+          <WordPlaceHolder value={4} array={word} totalState={total[4]} />
         </div>
         <div>
           {status === true ? (
@@ -110,7 +78,7 @@ function HomeComponent({ data }) {
           <button onClick={resetGame}>Get another word</button>
         </div>
 
-        <p>Attempt : {totalState.length - 1} / 5</p>
+        <p>Attempt : {total.length} / 5</p>
 
         <Input onKeyDownHandler={onKeyDownHandler} status={status} />
 
