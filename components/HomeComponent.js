@@ -27,11 +27,12 @@ function HomeComponent({ data, wordHint }) {
     checkResult();
   }, [answerWord]);
 
-  const onKeyDownHandler = (e, ref) => {
+  const onKeyDownHandler = (e, setValue) => {
     if (status === "failed") return;
     if (status === true) return;
     if (e.keyCode === 13) {
       setAnswerWord(e.target.value.toLowerCase().split(""));
+      setValue("");
     }
   };
 
@@ -52,16 +53,7 @@ function HomeComponent({ data, wordHint }) {
     setWord(data);
   };
 
-  const handleShowWord = () => {
-    setShowWord(true);
-  };
-
-  const handleHintWord = () => {
-    console.log(hint);
-    setHint((prevState) => {
-      return { ...prevState, showHint: !prevState.showHint };
-    });
-  };
+  const handleShowWord = () => setShowWord(true);
 
   const checkResult = () => {
     if (_.isEqual(answerWord, word)) return setStatus(true);

@@ -12,7 +12,7 @@ function Input({ onKeyDownHandler, status }) {
     <input
       className="p-4
  bg-gray-600 focus:outline-none text-white"
-      onKeyDown={(e) => onKeyDownHandler(e, ref)}
+      onKeyDown={(e) => onKeyDownHandler(e, setValue)}
       onChange={handleOnChange}
       type="text"
       name=""
