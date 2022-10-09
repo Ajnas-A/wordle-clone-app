@@ -5,8 +5,10 @@ import Input from "./Input";
 import getWordDetails from "../utils/getWordDetails";
 import HintModal from "./HintModal";
 import reducerHint from "../utils/reducerHint";
+import { useRouter } from "next/router";
 
 function HomeComponent({ data, wordHint }) {
+  const router = useRouter();
   const [answerWord, setAnswerWord] = useState([]);
   const [word, setWord] = useState(data);
   const [hint, dispatchHint] = useReducer(reducerHint, {
@@ -45,12 +47,13 @@ function HomeComponent({ data, wordHint }) {
   };
 
   const getNewWord = async () => {
-    const { data, wordHint } = await getWordDetails();
-    dispatchHint({
-      type: "CHANGE_HINT",
-      payload: wordHint,
-    });
-    setWord(data);
+    router.reload();
+    // const { data, wordHint } = await getWordDetails();
+    // dispatchHint({
+    //   type: "CHANGE_HINT",
+    //   payload: wordHint,
+    // });
+    // setWord(data);
   };
 
   const handleShowWord = () => setShowWord(true);
