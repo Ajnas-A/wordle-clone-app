@@ -47,13 +47,13 @@ function HomeComponent({ data, wordHint }) {
   };
 
   const getNewWord = async () => {
-    router.reload();
-    // const { data, wordHint } = await getWordDetails();
-    // dispatchHint({
-    //   type: "CHANGE_HINT",
-    //   payload: wordHint,
-    // });
-    // setWord(data);
+    // router.reload();
+    const { data, wordHint } = await getWordDetails();
+    dispatchHint({
+      type: "CHANGE_HINT",
+      payload: wordHint,
+    });
+    setWord(data);
   };
 
   const handleShowWord = () => setShowWord(true);
