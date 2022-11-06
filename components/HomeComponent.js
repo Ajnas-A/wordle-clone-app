@@ -83,7 +83,7 @@ function HomeComponent({ data, wordHint }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-start justify-center text-gray-200 relative py-2">
+    <div className="min-h-screen bg-gray-900 flex items-start md:items-center justify-center text-gray-200 relative py-2">
       <div className="space-y-2 flex flex-col items-center">
         <h1 className="text-center ">WORDLE</h1>
         <div className="flex flex-col space-y-2">
