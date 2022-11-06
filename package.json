@@ -12,7 +12,8 @@
     "lodash": "^4.17.21",
     "next": "12.3.1",
     "react": "18.2.0",
-    "react-dom": "18.2.0"
+    "react-dom": "18.2.0",
+    "react-simple-keyboard": "^3.4.231"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.12",

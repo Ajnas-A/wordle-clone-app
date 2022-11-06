@@ -6,6 +6,7 @@ import getWordDetails from "../utils/getWordDetails";
 import HintModal from "./HintModal";
 import reducerHint from "../utils/reducerHint";
 import { useRouter } from "next/router";
+import KeyboardComponent from "./KeyboardComponent";
 
 function HomeComponent({ data, wordHint }) {
   const router = useRouter();
@@ -18,25 +19,33 @@ function HomeComponent({ data, wordHint }) {
   const [status, setStatus] = useState(false);
   const [total, setTotal] = useState([]);
   const [showWord, setShowWord] = useState(false);
+  const [tempCheck, setTempCheck] = useState(["/"]);
 
   useEffect(() => {
     let totalState = {};
     if (answerWord.length === 0) return;
     const initialCheck = word.map((e) => answerWord.includes(e));
+    let ar = [];
+    answerWord.map((e) => {
+      if (!word.includes(e) && ar.length < 4) ar.push(e.toUpperCase());
+    });
+
+    setTempCheck([...tempCheck, ...ar]);
+
     const correctPlaced = word.map((e, i) => e === answerWord[i]);
     totalState = { initialCheck, answerWord, correctPlaced };
     setTotal([...total, totalState]);
     checkResult();
   }, [answerWord]);
 
-  const onKeyDownHandler = (e, setValue) => {
-    if (status === "failed") return;
-    if (status === true) return;
-    if (e.keyCode === 13) {
-      setAnswerWord(e.target.value.toLowerCase().split(""));
-      setValue("");
-    }
-  };
+  // const onKeyDownHandler = (e, setValue) => {
+  //   if (status === "failed") return;
+  //   if (status === true) return;
+  //   if (e.keyCode === 13) {
+  //     setAnswerWord(e.target.value.toLowerCase().split(""));
+  //     setValue("");
+  //   }
+  // };
 
   const resetGame = () => {
     setShowWord(false);
@@ -44,6 +53,12 @@ function HomeComponent({ data, wordHint }) {
     setAnswerWord([]);
     setStatus(false);
     setTotal([]);
+    setTempCheck(["/"]);
+  };
+
+  const keyboardEnter = (value, setInput) => {
+    setAnswerWord(value.toLowerCase().split(""));
+    setInput("");
   };
 
   const getNewWord = async () => {
@@ -68,10 +83,10 @@ function HomeComponent({ data, wordHint }) {
   };
 
   return (
-    <div className="h-screen bg-gray-900 flex items-center justify-center text-gray-200 relative">
-      <div className="space-y-5 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-900 flex items-start justify-center text-gray-200 relative py-2">
+      <div className="space-y-2 flex flex-col items-center">
         <h1 className="text-center ">WORDLE</h1>
-        <div className="flex flex-col space-y-3">
+        <div className="flex flex-col space-y-2">
           <WordPlaceHolder value={0} array={word} totalState={total[0]} />
           <WordPlaceHolder value={1} array={word} totalState={total[1]} />
           <WordPlaceHolder value={2} array={word} totalState={total[2]} />
@@ -93,26 +108,34 @@ function HomeComponent({ data, wordHint }) {
         </div>
 
         <p>Attempt : {total.length} / 5</p>
+        {/* <Input onKeyDownHandler={onKeyDownHandler} status={status} /> */}
 
-        <Input onKeyDownHandler={onKeyDownHandler} status={status} />
+        <div className="flex items-center justify-center space-x-1">
+          <button
+            className="bg-gray-600 rounded p-2 hover:bg-gray-400"
+            onClick={() => dispatchHint({ type: "SHOW" })}
+          >
+            Show Hint
+          </button>
 
-        <button
-          className="bg-gray-600 rounded p-2 hover:bg-gray-400"
-          onClick={() => dispatchHint({ type: "SHOW" })}
-        >
-          Show Hint
-        </button>
+          <button
+            className="bg-gray-600 rounded p-2 hover:bg-gray-400"
+            onClick={handleShowWord}
+          >
+            Show Word
+          </button>
+        </div>
+
         {hint.showHint && (
           <HintModal hint={hint.word} onClickHandler={dispatchHint} />
         )}
 
-        <button
-          className="bg-gray-600 rounded p-2 hover:bg-gray-400"
-          onClick={handleShowWord}
-        >
-          Show Word
-        </button>
         {showWord && <p>{word}</p>}
+        <KeyboardComponent
+          keyboardEnter={keyboardEnter}
+          disabledArray={tempCheck}
+          status={status}
+        />
       </div>
     </div>
   );

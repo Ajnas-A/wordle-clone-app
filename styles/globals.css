@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer components {
+    .simple-keyboard.hg-layout-default .hg-button.enableClass {
+      @apply bg-gray-500 sm:m-1 sm:w-9 sm:h-8 border-0
+    }
+
+    .simple-keyboard.hg-layout-default .hg-button.disableClass {
+        @apply bg-gray-800 sm:m-1 sm:w-9 sm:h-8 text-gray-600 cursor-not-allowed
+      }
+
+    .simple-keyboard.hg-layout-default {
+        @apply bg-gray-700 p-2
+    }
+
+    .workPlaceHolder{
+      @apply h-12 w-12 border flex items-center justify-center text-white capitalize font-semibold duration-500
+    }
+    /* ... */
+  }
+
+  
+
+  /* .simple-keyboard.hg-layout-default .hg-button.hg-red {
+    background: rgb(200, 0, 0, 0.7);
+    color: white;
+  } */
